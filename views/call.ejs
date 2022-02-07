@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stream</title>
+  <script>const ROOM_ID = "<%= streamId %>";</script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+  <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+  <style>
+    video { 
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+    }
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+    :root {
+      --main-darklg: #1d2635;
+      --main-dark: #161d29;
+      --primary-color: #2f80ec;
+      --main-light: #eeeeee;
+      font-family: "Poppins", sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 8vh;
+      position: relative;
+      width: 100%;
+      background-color: var(--main-darklg);
+    }
+
+    .logo > h3 {
+      color: var(--main-light);
+    }
+
+    .main {
+      height: 100vh;
+      display: flex;
+    }
+
+    .main__left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .videos__group {
+      flex-grow: 1;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      background-color: var(--main-dark);
+    }
+
+    video {
+      height: 74vmin;
+      border-radius: 1rem;
+      width: 50%;
+    }
+
+    .options {
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      background-color: var(--main-dark);
+    }
+
+    .options__left {
+      display: flex;
+    }
+
+    .options__right {
+      margin-left: auto;
+    }
+
+    .options__button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--primary-color);
+      height: 50px;
+      border-radius: 5px;
+      color: var(--main-light);
+      font-size: 1.2rem;
+      width: 150px;
+      margin: 0 0.5rem;
+    }
+
+    .background__red {
+      background-color: #f6484a;
+    }
+
+    .main__right {
+      display: flex;
+      flex-direction: column;
+      flex: 0.3;
+      background-color: #242f41;
+    }
+
+    .main__chat_window {
+      flex-grow: 1;
+      overflow-y: scroll;
+    }
+
+    .main__chat_window::-webkit-scrollbar {
+      display: none;
+    }
+
+    .main__message_container {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main__message_container > input {
+      height: 50px;
+      flex: 1;
+      font-size: 1rem;
+      border-radius: 5px;
+      padding-left: 20px;
+      border: none;
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      margin: 1.5rem;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+    }
+
+
+
+    .message > b {
+      color: #eeeeee;
+      display: flex;
+      align-items: center;
+      text-transform: capitalize;
+    }
+
+    .message > b > i {
+      margin-right: 0.7rem;
+      font-size: 1.5rem;
+    }
+
+    .message > span {
+      background-color: #eeeeee;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 5px;
+    }
+
+    #video-grid {
+      display: flex;
+    }
+
+    #showChat {
+      display: none;
+    }
+
+    .header__back {
+      display: none;
+      position: absolute;
+      font-size: 1.3rem;
+      top: 17px;
+      left: 28px;
+      color: #fff;
+    }
+
+    @media (max-width: 700px) {
+      #video-grid {
+        flex-wrap: wrap;
+      }
+      .main__right {
+        display: none;
+      }
+      .main__left {
+        width: 100%;
+        flex: 1;
+      }
+
+      video {
+        height: 74vmin;
+        width: 100%;
+      }
+
+      #showChat {
+        display: flex;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div style="display: none;" class="select">
+      <label for="audioOutput">Audio output destination: </label><select id="audioOutput"></select>
+  </div>
+
+
+
+</div>
+<div class="main">  
+<div class="main__left">
+  <div class="videos__group">
+    <div id="video-grid">
+      <video id="my-camera" playsinline  autoplay muted="true"></video>
+      <video id="peer-camera"  playsinline autoplay></video>
+    </div>
+  </div>
+  <div class="options">
+    <div class="options__left">
+      <div class="dropdown">
+        <button class="btn btn-light" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-video"></i>
+        </button>
+        <div id="video_dropdawn" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <select style="border: none;" id="videoSource" class="form-select" multiple aria-label="multiple select example">
+            
+          </select>
+          <p id="noneVideo" class="dropdown-item">Выключить видео</p>
+        </div>
+      </div>
+   
+      <div class="dropdown">
+        <button style="margin: 0px 5px;" class="btn btn-secondary " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <div id="audio_dropdawn" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <select style="border: none;"  id="audioSource" class="form-select" multiple aria-label="multiple select example">
+          </select>
+          <p id="noneAudio" class="dropdown-item">Выключить Аудио</p>
+        </div>
+      </div>
+      <div id="stop_call" style="margin-right: 5px;" class="btn btn-danger">
+        <i class="fas fa-phone-slash"></i>
+      </div>
+      <div id="display_share" class="btn btn-primary">
+        <i class="fas fa-desktop"></i>
+      </div>
+   
+    </div>
+     
+    
+  </div>
+</div>
+
+</div>
+<script src="/script.js" async></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
